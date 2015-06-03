@@ -1,0 +1,40 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "Human",
+    "longName": "Camp Grounded",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "fonts/RobotoSlab-Light.ttf",
+                "name": "Roboto_Slab_Light_40",
+                "type": "font"
+            },
+            {
+                "file": "fonts/RobotoSlab-Light.ttf",
+                "name": "Roboto_Slab_Light_18",
+                "type": "font"
+            },
+            {
+                "file": "images/Dithered Image.png",
+                "menuIcon": true,
+                "name": "Red_Woods",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "Camp Grounded",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
+    "uuid": "788dde10-f252-48d1-9929-587ab7fbde15",
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
