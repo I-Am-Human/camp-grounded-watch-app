@@ -1,14 +1,15 @@
 #include <pebble.h>
 #include "effect_layer.h"
 
-int tap = 1;
+int tap = 0;
 int vertical_divide = 75;
 
-bool invert = true;
+bool invert = false;
+
+#define KEY_INVERT 0
 
 static Window *s_main_window;
 static TextLayer *s_text_layer;
-
 static EffectLayer *s_effect_layer;
 
 //declare the font we will use
@@ -19,16 +20,7 @@ static GFont now_font;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 
-void now_text(){
-
-}
-
-void att_text(){
-
-}
-
 static void tap_handler(AccelAxisType axis, int32_t direction) {
-
     switch (axis) {
   case ACCEL_AXIS_X:
     break;
@@ -45,13 +37,34 @@ static void tap_handler(AccelAxisType axis, int32_t direction) {
     break;
   case ACCEL_AXIS_Z:
     break;
-
   }
 }
 
-
-
-   
+//handle the configuration window
+static void in_recv_handler(DictionaryIterator *iterator, void *context)
+{
+  //Get Tuple
+  Tuple *t = dict_read_first(iterator);
+  if(t)
+  {
+    switch(t->key)
+    {
+   	case KEY_INVERT:
+      //It's the KEY_INVERT key
+      if(strcmp(t->value->cstring, "on") == 0)
+      {
+        //save as inverted
+        persist_write_bool(KEY_INVERT, true);
+      }
+      else if(strcmp(t->value->cstring, "off") == 0)
+      {
+        //save as not inverted
+        persist_write_bool(KEY_INVERT, false);
+      }
+      break;
+    }
+  }
+}
 
 static void main_window_load(Window *window) {
   	s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_Red_Woods);
@@ -61,7 +74,7 @@ static void main_window_load(Window *window) {
     
     Layer *window_layer = window_get_root_layer(window);
 
-        // Create fonts
+    // Create fonts
     now_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_Roboto_Slab_Light_40));
     att_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_Roboto_Slab_Light_18));
     
@@ -75,12 +88,15 @@ static void main_window_load(Window *window) {
     text_layer_set_text_color(s_text_layer, GColorBlack);
     text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
 	
-		//create inverter layer
-		if (invert){
+		//Check for saved option
+	  invert = persist_read_bool(KEY_INVERT);
+ 
+  	//Option-specific setup
+  	if (invert){
 			s_effect_layer = effect_layer_create(GRect(0,0,144,168));
 			effect_layer_add_effect(s_effect_layer, effect_invert, NULL);
 			layer_add_child(window_layer,effect_layer_get_layer(s_effect_layer));
-		}
+		} else{}
 }
 
 static void main_window_unload(Window *window) {
@@ -97,7 +113,7 @@ static void main_window_unload(Window *window) {
   bitmap_layer_destroy(s_background_layer);
 	if(invert){
 	//Destroy inverter layer
-		effect_layer_destroy(s_effect_layer);}
+	effect_layer_destroy(s_effect_layer);}
 }
 
 static void init() {
@@ -111,13 +127,15 @@ static void init() {
 
   // Subscribe to the accelerometer tap service
   accel_tap_service_subscribe(tap_handler);
-  
+	
+	//start AppMessage to communicate with phone
+  app_message_register_inbox_received((AppMessageInboxReceived) in_recv_handler);
+	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 }
 
 static void deinit() {
   // Destroy main Window
   window_destroy(s_main_window);
-
   accel_tap_service_unsubscribe();
   
 }
